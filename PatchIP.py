@@ -29,6 +29,7 @@ if __name__ == '__main__':
 
     FIRMWARE = sys.argv[1]
     filename = FIRMWARE+'_PATCH.tar.gz'
+    pwd = command('pwd')[0]
 
     OUTPUT = '_'+FIRMWARE+'.extracted'
     IPlist = [0 for i in range(255)] #ip research
@@ -37,12 +38,15 @@ if __name__ == '__main__':
     #time.sleep(100000)
 
     print('[+] Firmware Extract using binwalk.....')
-    command('binwalk -Me {}'.format(FIRMWARE)) 
+    command('binwalk -e {}'.format(FIRMWARE)) 
 
     ls = command('ls')
+    #print(ls)
 
+    #input(OUTPUT)
     if filename in ls:
-        command('rm -r ./'+filename)
+        command('rm -r ./'+filename) #Already exist
+
 
     if OUTPUT in ls:
         print('[*] Success!!')
@@ -50,14 +54,37 @@ if __name__ == '__main__':
         print('[-] Extract Error')
         sys.exit(-1)
 
-    os.chdir('./'+OUTPUT)
+    os.chdir('./'+OUTPUT) #in
+    
+    #test code
+    ls = command('ls')
+    
+    binfile = ''
+
+    if len(ls) < 10:
+        for f in ls:
+            if '.bin' in f:
+                binfile = f
+                break
+
+        command('find ./ ! -name "*.bin" -exec rm -rf {} \;')
+        command('binwalk -e '+binfile)
+        command('find ./ -name "*.bin" -exec rm -rf {} \;')
+
+        ls = command('ls')
+
+        os.chdir('./'+ls[0])
+        command('mv ./* ../')
+        os.chdir('../')
+    
+    ###
     result = command('grep -r "192.168" ./')
 
     s = "[*] Search Firmware Webserver IP."
     print(s)
     for data in result:
         for i in range(0,256): #0~255
-            if '192.168.'+str(i) in data:
+            if '192.168.'+str(i)+'.' in data:
                 IPlist[i] += 1
                 break
 
@@ -81,7 +108,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     print("[*] IP OK")
-    cmd = 'find . -name "*" -exec perl -pi -e "s/192.168.'+str(ip)+'/192.168.'+str(x)+'/g" {} \;'
+    cmd = 'find ./ -name "*" -exec perl -pi -e "s/192.168.'+str(ip)+'/192.168.'+str(x)+'/g" {} \;'
     command(cmd+' 2> /dev/null')
 
     cmd = 'tar -czvf '+filename+' ./*'
