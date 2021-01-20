@@ -78,7 +78,9 @@ if __name__ == '__main__':
         os.chdir('../')
     
     ###
-    result = command('grep -r "192.168" ./')
+    NAT = input('Input Local IP x (192.168.x.N): ')
+
+    result = command('grep -r "192.168." ./')
 
     s = "[*] Search Firmware Webserver IP."
     print(s)
@@ -91,6 +93,7 @@ if __name__ == '__main__':
 
     ip, value = max(enumerate(IPlist), key=operator.itemgetter(1))
 
+    '''
     search = []
     for i in range(len(IPlist)):
         if(IPlist[i] == 0):
@@ -98,18 +101,26 @@ if __name__ == '__main__':
 
     print(search)
     print('\n\n')
-    X = input('Input x of Change IP(192.168.x.1) : ') 
+    '''
+    X = input('Input x(10~200) : ') 
     x = int(X)
-    
-    res = NetCheck('192.168.'+str(x)+'.1')
+    res = NetCheck('192.168.'+str(NAT)+'.'+str(x))
 
     if res == 0:
         print("[-] Can not use IP address. ")
         sys.exit(-1)
 
     print("[*] IP OK")
-    cmd = 'find ./ -name "*" -exec perl -pi -e "s/192.168.'+str(ip)+'/192.168.'+str(x)+'/g" {} \;'
+
+    cmd = 'find ./ -name "*" -exec perl -pi -e "s/192.168.'+str(ip)+'/192.168.'+str(NAT)+'/g" {} \;'
     command(cmd+' 2> /dev/null')
+
+    cmd = 'find ./ -name "*" -exec perl -pi -e "s/192.168.'+str(NAT)+'.1'+'/192.168.'+str(NAT)+'.'+str(x)+'/g" {} \;'
+    command(cmd+' 2> /dev/null')
+
+    for i in range(0,10):
+        cmd = 'find ./ -name "*" -exec perl -pi -e "s/192.168.'+str(NAT)+'.'+str(x)+str(i)+'/192.168.'+str(NAT)+'.1'+str(i)+'/g" {} \;'
+        command(cmd+' 2> /dev/null')
 
     cmd = 'tar -czvf '+filename+' ./*'
     command(cmd)
