@@ -21,24 +21,6 @@ def NetCheck(ip):
     else:
         return 1 #OK
 
-def Patchport(INDEX):
-    find ="listen=:200"
-    match = "listen=:"+str(INDEX)+"00"
-    os.chdir('./scripts')
-    cmd = 'find ./ -name "*" -exec perl -pi -e "s/'+str(find)+'/'+str(match)+'/g" {} \;'
-
-    command(cmd+' 2> /dev/null')
-    os.chdir('../')
-
-def Depatchport(INDEX):
-    find ="listen=:"+str(INDEX)+"00"
-    match = "listen=:200"
-    os.chdir('./scripts')
-    cmd = 'find ./ -name "*" -exec perl -pi -e "s/'+str(find)+'/'+str(match)+'/g" {} \;'
-
-    command(cmd+' 2> /dev/null')
-    os.chdir('../')
-
 
 if __name__ == '__main__':
     
@@ -57,20 +39,6 @@ if __name__ == '__main__':
 
     command('rm -r '+OUTPUT)
     #time.sleep(100000)
-
-    buf = []
-    while True:
-        if int(INDEX) >= 10:
-            print("INDEX 0~9")
-            sys.exit(-1)
-
-        buf = command('netstat -nlp | grep "'+str(INDEX)+'001"')
-
-        if len(buf) != 0:
-            INDEX = input("Already Use, bind error...'\n INDEX : ")
-        else:
-            Patchport(INDEX)
-            break
 
     print('[+] Firmware Extract using binwalk.....')
     command('binwalk -e {}'.format(FIRMWARE))

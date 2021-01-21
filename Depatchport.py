@@ -12,13 +12,13 @@ def command(cmd):
     return result
 
 if __name__ == "__main__":
-    #os.chdir('./scripts')
+    os.chdir('./scripts')
 
     for i in range(1,10):
         find ="listen=:"+str(i)+"00"
         match = "listen=:200"
         cmd = 'find ./makeNetwork.py -name "*" -exec perl -pi -e "s/'+str(find)+'/'+str(match)+'/g" {} \;'
         command(cmd+' 2> /dev/null')
-        print("Patch "+str(i))
+    print("Success Patch.")
 
-    #os.chdir('../')
+    os.chdir('../')
