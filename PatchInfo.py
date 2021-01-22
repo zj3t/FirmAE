@@ -25,17 +25,16 @@ def NetCheck(ip):
 if __name__ == '__main__':
     
     argc = len(sys.argv)
-    if argc != 3:
-        print("usage: PatchInfo.py [firmware] [index]")
+    if argc != 2:
+        print("usage: PatchInfo.py [firmware]")
         exit()
 
     FIRMWARE = sys.argv[1]
-    INDEX = sys.argv[2]
     filename = FIRMWARE+'_PATCH.tar.gz'
     pwd = command('pwd')[0]
 
     OUTPUT = '_'+FIRMWARE+'.extracted'
-    IPlist = [0 for i in range(255)] #ip research
+    IPlist = [0 for i in range(256)] #ip research
 
     command('rm -r '+OUTPUT)
     #time.sleep(100000)
@@ -60,26 +59,45 @@ if __name__ == '__main__':
 
     #test code
     ls = command('ls')
-
     binfile = ''
+    sr = ''
 
-    if len(ls) < 10:
+    if len(ls) < 10 or 'squashfs-root' not in ls:
         for f in ls:
             if '.bin' in f:
                 binfile = f
                 break
+            elif '.trx' in f:
+                binfile = f
+                break
+            elif 'squashfs-root' in f:
+                sr = f
+                break
 
-        command('find ./ ! -name "*.bin" -exec rm -rf {} \;')
-        command('binwalk -e '+binfile)
-        command('find ./ -name "*.bin" -exec rm -rf {} \;')
+        if binfile:
+            if '.bin' in binfile:
+                command('find ./ ! -name "*.bin" -exec rm -rf {} \;')
+                command('binwalk -e '+binfile)
+                command('find ./ -name "*.bin" -exec rm -rf {} \;')
+            elif '.trx' in binfile:
+                command('find ./ ! -name "*.trx" -exec rm -rf {} \;')
+                command('binwalk -e '+binfile)
+                command('find ./ -name "*.trx" -exec rm -rf {} \;')
+
+        elif sr:
+            for i in ls:
+                if 'squashfs-root' not in i:
+                    command('rm -rf '+i)
+                else:
+                    break
 
         ls = command('ls')
-
+        
         os.chdir('./'+ls[0])
         command('mv ./* ../')
         os.chdir('../')
-    
     ###
+
     NAT = input('Input Local IP x (192.168.x.N): ')
 
     result = command('grep -r "192.168." ./')
@@ -93,6 +111,7 @@ if __name__ == '__main__':
                 break
 
 
+    print(IPlist)
     ip, value = max(enumerate(IPlist), key=operator.itemgetter(1))
 
     '''
