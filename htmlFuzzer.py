@@ -97,13 +97,13 @@ def get_information():
     hidden_data = []
     http_map = {}
 
-    cmd = 'find ./ -name "*.htm" 2> /dev/null'
+    cmd = 'find ./'+str(IID)+' -name "*.htm" 2> /dev/null'
     buf = command(cmd)
 
     for i in range(0, len(buf)):
         #webpage.append(buf[i][16::])
         webpage.append(buf[i])
-
+    
     cmd = 'grep -r \'<input type="hidden" name=\' ./'+str(IID) 
     hidden = command(cmd)
 
@@ -133,9 +133,16 @@ def get_information():
         for name in var_name:
             http_name_value[name] = var_value
         
-        page = page[23::]
-        #print(page)
-        #input()
+        #page = page[23::]
+        index = 0
+        tmp = []
+        while index != -1:
+            index = page.find('/')
+            if index != -1:
+                tmp.append(index)
+        index = tmp.pop()
+        print(page[index::])
+        input()
         http_map[page] = http_name_value
         #print(page)
         #print(http_name_value)
@@ -186,6 +193,7 @@ def fuzz(infos, http_map, html_page, payload, idx):
     dummy_idx_list = []
     idx = 0
     nameTag = []
+    value = ''
 
     for info in infos:
         print('[*] Attack : '+str(info['port']))
@@ -198,7 +206,7 @@ def fuzz(infos, http_map, html_page, payload, idx):
 
             range_ = len(value) - 1
             count = 0
-            while count < 1000:
+            while count < 100:
                 for name in nameTag:
                     index = random.randrange(0,range_)
                     data[name] = value[index]
@@ -254,7 +262,7 @@ def main():
     http_map = {}
     webpage = []
     
-    infos = get_open_port(NMAP=False)
+    infos = get_open_port(NMAP=True)
     #@print("[*] ports info")
     #print(infos)
     http_map, webpage = get_information()
